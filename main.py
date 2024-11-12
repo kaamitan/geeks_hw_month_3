@@ -1,11 +1,13 @@
 from config import bot, dp
-from aiogram import Bot, Dispatcher, executor, types  # type: ignore
+from aiogram import executor  # type: ignore
 import logging
-from handlers import command, quiz, game
+from handlers import command, quiz, game, fsm_reg, store
 
 command.register_commands(dp)
 quiz.register_quiz(dp)
 game.register_game(dp)
+# fsm_reg.reg_handler_fsm_store(dp)
+store.register_handlers_store(dp)
 
 
 if __name__ == "__main__":
