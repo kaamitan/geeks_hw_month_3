@@ -1,65 +1,45 @@
+from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram import types, Dispatcher
-from aiogram.dispatcher.filters import Text
 from db import db_main
 
 
-async def start_send_products(message: types.Message):
-    keyboard = types.InlineKeyboardMarkup(resize_keyboard=True, row_width=2)
-    button_all = types.InlineKeyboardButton("Вывести все товары", callback_data="all")
-    button_one = types.InlineKeyboardButton("Вывести по одному", callback_data="one")
-    keyboard.add(button_all, button_one)
-
-    await message.answer("Выберите как отправить товары:", reply_markup=keyboard)
+class EditProductFSM(StatesGroup):
+    waiting_for_field = State()
+    waiting_for_value = State()
 
 
-async def send_all_products(callback_query: types.CallbackQuery):
-    products = db_main.fetch_all_products()
-    if products:
-        for product in products:
-            caption = (
-                f"Заполненный товар: \n"
-                f"Название - {product['name_product']}\n"
-                f"Артикул - {product['product_id']}\n"
-                f"Размер - {product['size']}\n"
-                f"Цена - {product['price']}\n"
-                f"Информация о товаре - {product['info_product']}\n"
-                f"Категория - {product['category']}\n"
-            )
-            await callback_query.message.answer_photo(
-                photo=product["photo"], caption=caption
-            )
-    else:
-        await callback_query.message.answer(text="В базе товаров нет!")
+async def start_edit(callback_query: types.CallbackQuery, state: FSMContext):
+    product_id = int(callback_query.data.split("_")[1])
+    await state.update_data(product_id=product_id)
+
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    keyboard.add("name_product", "size", "price", "photo", "info_product", "category")
+    await callback_query.message.answer(
+        "Выберите поле для редактирования:", reply_markup=keyboard
+    )
+    await EditProductFSM.waiting_for_field.set()
 
 
-async def send_single_product(callback_query: types.CallbackQuery):
-    await callback_query.message.answer("Введите артикул товара:")
-    await callback_query.answer()
+async def process_field(message: types.Message, state: FSMContext):
+    field_name = message.text
+    await state.update_data(field_name=field_name)
+    await message.answer(f"Введите новое значение для {field_name}:")
+    await EditProductFSM.waiting_for_value.set()
 
 
-async def receive_product_id(message: types.Message):
-    try:
-        product_id = int(message.text)
-        product = db_main.fetch_product_by_id(product_id)
-        if product:
-            caption = (
-                f"Заполненный товар: \n"
-                f"Название - {product['name_product']}\n"
-                f"Артикул - {product['product_id']}\n"
-                f"Размер - {product['size']}\n"
-                f"Цена - {product['price']}\n"
-                f"Информация о товаре - {product['info_product']}\n"
-                f"Категория - {product['category']}\n"
-            )
-            await message.answer_photo(photo=product["photo"], caption=caption)
-        else:
-            await message.answer(f"Товар с артикулом {product_id} не найден.")
-    except ValueError:
-        await message.answer("Пожалуйста, введите корректный артикул (целое число).")
+async def process_value(message: types.Message, state: FSMContext):
+    user_data = await state.get_data()
+    product_id = user_data["product_id"]
+    field_name = user_data["field_name"]
+    new_value = message.text
+
+    db_main.update_product_field(product_id, field_name, new_value)
+    await message.answer(f"Товар успешно обновлен: {field_name} = {new_value}")
+    await state.finish()
 
 
-def register_handlers(dp: Dispatcher):
-    dp.register_message_handler(start_send_products, commands="send_products")
-    dp.register_callback_query_handler(send_all_products, Text(equals="all"))
-    dp.register_callback_query_handler(send_single_product, Text(equals="one"))
-    dp.register_message_handler(receive_product_id)
+def register_edit_handler(dp: Dispatcher):
+    dp.register_callback_query_handler(start_edit, Text(startswith="edit_"), state="*")
+    dp.register_message_handler(process_field, state=EditProductFSM.waiting_for_field)
+    dp.register_message_handler(process_value, state=EditProductFSM.waiting_for_value)

@@ -142,4 +142,3 @@ def reg_handler_fsm_store(dp: Dispatcher):
         load_photo, state=store_fsm.photo, content_types=["photo"]
     )
     dp.register_message_handler(submit, state=store_fsm.submit)
-    dp.register_message_handler(submit, state=store_fsm.submit)

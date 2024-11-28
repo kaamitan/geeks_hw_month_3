@@ -2,21 +2,23 @@ from config import bot, dp, Admins
 from aiogram import executor, types
 import logging
 from handlers import (
-    command,
+    commands,
     quiz,
     fsm_reg,
     echo,
     fsm_store,
     send_products,
     send_and_delete_products,
+    edit_products,
 )
 from db import db_main
 
 
 async def on_startup(_):
-    db_main.sql_create()  # Убрано "await", так как sql_create синхронная
     for admin in Admins:
         await bot.send_message(chat_id=admin, text="Бот включен!")
+
+        await db_main.sql_create()
 
 
 async def on_shutdown(_):
@@ -24,13 +26,14 @@ async def on_shutdown(_):
         await bot.send_message(chat_id=admin, text="Бот выключен!")
 
 
-command.register_commands(dp)
+commands.register_commands(dp)
 quiz.register_handler_quiz(dp)
 fsm_reg.reg_handler_fsm_registration(dp)
 fsm_store.reg_handler_fsm_store(dp)
 
 send_products.register_handlers(dp)
 send_and_delete_products.register_handlers(dp)
+edit_products.register_edit_handler(dp)
 
 echo.register_echo(dp)
 
