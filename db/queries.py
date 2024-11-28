@@ -1,80 +1,29 @@
-# queries.py
-CREATE_TABLE_TABLE = """
+INSERT_STORE = """
+INSERT INTO store (name_product, product_id, size, price, photo)
+VALUES (?, ?, ?, ?, ?);
+"""
+
+
+INSERT_STORE_DETAIL = """
+INSERT INTO store_detail (info_product, product_id, category)
+VALUES (?, ?, ?);
+"""
+CREATE_TABLE_STORE = """
 CREATE TABLE IF NOT EXISTS store (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     name_product TEXT,
     product_id TEXT,
     size TEXT,
-    price INTEGER,
+    price TEXT,
     photo BLOB
 );
 """
 
-INSERT_STORE = """
-INSERT INTO store (
-    name_product,
-    product_id,
-    size,
-    price,
-    photo
-)
-VALUES (?, ?, ?, ?, ?);
-"""
-
-CREATE_TABLE_PRODUCTS_DETAILS = """
-CREATE TABLE IF NOT EXISTS products_details (
-    id INTEGER PRIMARY KEY,
+CREATE_TABLE_STORE_DETAIL = """
+CREATE TABLE IF NOT EXISTS store_detail (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    info_product TEXT,
     product_id TEXT,
-    category TEXT,
-    infoproduct TEXT
+    category TEXT
 );
-"""
-
-INSERT_PRODUCTS_DETAILS = """
-INSERT INTO products_details (
-    product_id,
-    category,
-    infoproduct
-)
-VALUES (?, ?, ?);
-"""
-
-CREATE_TABLE_COLLECTION_PRODUCTS = """
-CREATE TABLE IF NOT EXISTS collection_products (
-    id INTEGER PRIMARY KEY,
-    product_id TEXT,
-    collection TEXT
-);
-"""
-
-INSERT_COLLECTION_PRODUCTS = """
-INSERT INTO collection_products (
-    product_id,
-    collection
-)
-VALUES (?, ?);
-"""
-
-CREATE_STAGES_TABLE = """
-CREATE TABLE IF NOT EXISTS stages (
-    id INTEGER PRIMARY KEY,
-    product_id TEXT,
-    stage_name TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-"""
-
-INSERT_STAGE = """
-INSERT INTO stages (
-    product_id,
-    stage_name
-)
-VALUES (?, ?);
-"""
-
-GET_STAGES_FOR_PRODUCT = """
-SELECT stage_name, created_at
-FROM stages
-WHERE product_id = ?
-ORDER BY created_at;
 """

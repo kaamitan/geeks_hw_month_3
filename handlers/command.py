@@ -1,30 +1,29 @@
-# command.py
-from aiogram import types, Dispatcher  # type: ignore
+# commands.py
+from aiogram import types, Dispatcher
 from config import bot, dp
 import os
-import random
 
 
-# @dp.message_handler(commands=["start"])
 async def start(message: types.Message):
-    await bot.send_message(
-        chat_id=message.from_user.id,
-        text=f"Hello! {message.from_user.first_name}\n"
-        f"your Telegram id = {message.from_user.id}",
-    )
-    await bot.send_message(
-        chat_id=message.from_user.id,
-        text=f"че как дела у вас {message.from_user.first_name}\n",
-    )
+    await bot.send_message(chat_id=message.from_user.id,
+                           text=f'Hello {message.from_user.first_name}\n'
+                                f'Твой Telegram Id - {message.from_user.id}')
+
 
 
 async def send_mem(message: types.Message):
-    photoPath = os.path.join("./media", random.choice(os.listdir("./media")))
-    with open(photoPath, "rb") as photo:
-        await message.answer_photo(photo=photo, caption="/mem")
+    # photo_path = os.path.join("media", "img.jpg")
 
+    photo_path = "media/img.jpg"
 
-# with open(photoPath, "rb") as photo:
+    photo = open(photo_path, "rb")
+    await message.answer_photo(photo=photo,
+                               caption='Мем')
+    
+
+    # with open(photo_path, "rb") as image:
+    #     await message.answer_photo(photo=image,
+    #                                caption='Мем')
 
 
 def register_commands(dp: Dispatcher):
