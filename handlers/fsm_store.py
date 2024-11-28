@@ -20,7 +20,7 @@ class store_fsm(StatesGroup):
 
 async def start_fsm_store(message: types.Message):
     await store_fsm.name_product.set()
-    await message.answer(text="Введите название товара: ", reply_markup=buttons.cancel)
+    await message.answer(text="Введите название товара: ", reply_markup=buttons.cancel2)
 
 
 async def load_name_product(message: types.Message, state=FSMContext):
@@ -41,7 +41,7 @@ async def load_collection(message: types.Message, state=FSMContext):
     async with state.proxy() as data:
         data["collection"] = message.text
 
-        await db_main.sql_insert_collection_products(
+        db_main.sql_insert_collection_products(
             product_id=data["product_id"], collection=data["collection"]
         )
 
@@ -60,7 +60,7 @@ async def load_info_product(message: types.Message, state=FSMContext):
     async with state.proxy() as data:
         data["infoproduct"] = message.text
 
-        await db_main.sql_insert_products_details(
+        db_main.sql_insert_products_details(
             product_id=data["product_id"],
             category=data["category"],
             infoproduct=data["infoproduct"],
@@ -110,7 +110,7 @@ async def submit(message: types.Message, state=FSMContext):
         await message.answer("Отлично, товар в базе!", reply_markup=kb_remove)
 
         async with state.proxy() as data:
-            await db_main.sql_insert_store(
+            db_main.sql_insert_store(
                 name_product=data["name_product"],
                 product_id=data["product_id"],
                 size=data["size"],

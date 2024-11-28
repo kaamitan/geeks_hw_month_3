@@ -1,28 +1,31 @@
-from config import bot, dp, root
+from config import bot, dp, Admin
 from aiogram import executor  # type: ignore
 import logging
 from handlers import command, quiz, game, fsm_reg, store, echo, fsm_store
+from db import db_main
 
 
-async def botA(_):
-    for i in root:
-        await bot.send_message(i, "Бот включен")
+async def activeBot(_):
+    db_main.sql_create()  # Убрано "await", так как sql_create() синхронная
+    for i in Admin:
+        await bot.send_message(i, "Bot is Active")
 
 
-async def botD(_):
-    for i in root:
-        await bot.send_message(i, "Бот выключен")
+async def activeisNotBot(_):
+    for i in Admin:
+        await bot.send_message(i, "Bot is not Active")
 
 
 command.register_commands(dp)
 quiz.register_quiz(dp)
 game.register_game(dp)
-# fsm_reg.reg_handler_fsm_store(dp)
 store.register_handlers_store(dp)
 fsm_store.reg_handler_fsm_store(dp)
 
+echo.echo_register_handler(dp)
 
-echo.register_message_handler_echo(dp)
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    executor.start_polling(dp, skip_updates=True, on_startup=botA, on_shutdown=botD)
+    executor.start_polling(
+        dp, skip_updates=True, on_startup=activeBot, on_shutdown=activeisNotBot
+    )

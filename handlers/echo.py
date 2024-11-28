@@ -1,4 +1,5 @@
 from aiogram import types, Dispatcher
+from time import sleep
 
 
 async def echo_message(message: types.Message):
@@ -7,10 +8,10 @@ async def echo_message(message: types.Message):
             result = int(message.text) ** 2
             await message.answer(result)
         except ValueError:
-            await message.answer("ввeдите число или слово")
+            await message.answer("ввидите число или слово")
     else:
         await message.answer(message.text)
 
 
-def register_message_handler_echo(dp: Dispatcher):
+def echo_register_handler(dp: Dispatcher):
     dp.register_message_handler(echo_message)

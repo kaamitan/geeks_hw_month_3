@@ -11,6 +11,8 @@ class StoreFSM(StatesGroup):
     category = State()
     price = State()
     photo = State()
+    collection = State()
+    info_product = State()
     confirmation = State()
 
 
